@@ -114,3 +114,49 @@ sys_hello(void)
   printf("Hello from the kernel!\n");
   return 0;
 }
+
+uint64
+sys_getpid2(void)
+{
+  uint64 pid = myproc()->pid;
+  return pid;
+}
+
+
+// I tried defining a new lock, 
+//and understood that I must not reinitialize a lock after it
+//has been initialized in initproc
+extern struct spinlock wait_lock;
+
+uint64
+sys_getppid(void)
+{
+  struct proc* chproc = myproc();
+  uint64 ppid;
+  acquire(&wait_lock);
+  ppid = chproc->parent->pid;
+  release(&wait_lock);
+  return ppid;
+}
+
+extern struct proc proc[NPROC];
+
+uint64
+sys_getnumchild(void)
+{
+  struct proc* pp = myproc();
+  struct proc* p;
+  uint64 numChild = 0;
+  acquire(&wait_lock);
+  for (p =  proc; p<&proc[NPROC]; p++)
+  {
+    if(p!=pp){
+        if (p->parent == pp && (p->state != ZOMBIE && p->state != UNUSED) )
+        {
+          numChild++;
+        }
+    }
+  }
+  release(&wait_lock);
+  return numChild;
+}

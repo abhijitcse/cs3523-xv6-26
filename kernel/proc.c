@@ -54,7 +54,7 @@ void
 procinit(void)
 {
   struct proc *p;
-  
+  // If a lock is initialized in procinit,never initialize again.
   initlock(&pid_lock, "nextpid"); // Initializing changes the locked bit to 0/unlocked status
   initlock(&wait_lock, "wait_lock");
   for(p = proc; p < &proc[NPROC]; p++) {
@@ -680,7 +680,7 @@ procdump(void)
   [SLEEPING]  "sleep ",
   [RUNNABLE]  "runble",
   [RUNNING]   "run   ",
-  [ZOMBIE]    "zombie"
+  [ZOMBIE]    "zombie" 
   };
   struct proc *p;
   char *state;
@@ -697,3 +697,4 @@ procdump(void)
     printf("\n");
   }
 }
+
