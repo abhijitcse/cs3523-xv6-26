@@ -146,7 +146,12 @@ UPROGS=\
 	$U/_forphan\
 	$U/_dorphan\
 	$U/_hello\
-	$U/_syscalltest\
+	$U/_A1\
+	$U/_A2\
+	$U/_B1\
+	$U/_B2\
+	$U/_C2\
+	$U/_C3\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

@@ -132,9 +132,11 @@ uint64
 sys_getppid(void)
 {
   struct proc* chproc = myproc();
-  uint64 ppid;
+  uint64 ppid = -1;
   acquire(&wait_lock);
-  ppid = chproc->parent->pid;
+  if(chproc->parent){
+    ppid = chproc->parent->pid;
+  }
   release(&wait_lock);
   return ppid;
 }
@@ -151,12 +153,53 @@ sys_getnumchild(void)
   for (p =  proc; p<&proc[NPROC]; p++)
   {
     if(p!=pp){
+      acquire(&p->lock);
         if (p->parent == pp && (p->state != ZOMBIE && p->state != UNUSED) )
         {
           numChild++;
         }
+      release(&p->lock);
     }
   }
   release(&wait_lock);
   return numChild;
+}
+
+uint64
+sys_getsyscount(void){
+  struct proc *p = myproc();
+  int syscount;
+  acquire(&p->lock);
+  syscount = p->syscount;
+  release(&p->lock);
+  return syscount;
+}
+
+uint64
+sys_getchildsyscount(void){
+  int pid,syscount = -1;
+  argint(0,&pid);
+  if (pid<=0)
+  {
+    return -1;
+  }
+  
+  struct proc *p;
+  struct proc *pp = myproc();
+  acquire(&wait_lock);
+  for (p =  proc; p<&proc[NPROC]; p++)
+  {
+    if(p!=pp){
+      acquire(&p->lock);
+      if (p->parent == pp && p->pid == pid && p->state!=UNUSED)
+      {
+        syscount = p->syscount;
+        release(&p->lock);
+        break;
+      }
+      release(&p->lock);
+    }
+  }
+  release(&wait_lock);
+  return syscount;
 }
