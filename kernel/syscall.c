@@ -31,7 +31,8 @@ fetchstr(uint64 addr, char *buf, int max)
 }
 
 static uint64
-argraw(int n)
+argraw(int n)//takes in raw arguments for system call
+//loaded from trapframe 
 {
   struct proc *p = myproc();
   switch (n) {
@@ -48,12 +49,13 @@ argraw(int n)
   case 5:
     return p->trapframe->a5;
   }
+  //if more than 5 arguments calls panic
   panic("argraw");
   return -1;
 }
 
 // Fetch the nth 32-bit system call argument.
-void
+void // used to retrieve int arguments, eg read(fd, buf,n) fd,n are read from this
 argint(int n, int *ip)
 {
   *ip = argraw(n);
@@ -62,7 +64,7 @@ argint(int n, int *ip)
 // Retrieve an argument as a pointer.
 // Doesn't check for legality, since
 // copyin/copyout will do that.
-void
+void //Just takes the address, will not check if its allowed or not
 argaddr(int n, uint64 *ip)
 {
   *ip = argraw(n);
@@ -101,6 +103,14 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
+extern uint64 sys_hello(void);
+extern uint64 sys_getpid2(void);
+extern uint64 sys_getppid(void);
+extern uint64 sys_getnumchild(void);
+extern uint64 sys_getsyscount(void);
+extern uint64 sys_getchildsyscount(void);
+extern uint64 sys_getlevel(void);
+extern uint64 sys_getmlfqinfo(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -126,6 +136,14 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_hello]   sys_hello,
+[SYS_getpid2]  sys_getpid2,
+[SYS_getppid]  sys_getppid,
+[SYS_getnumchild]  sys_getnumchild,
+[SYS_getsyscount]  sys_getsyscount,
+[SYS_getchildsyscount]  sys_getchildsyscount,
+[SYS_getlevel]  sys_getlevel,
+[SYS_getmlfqinfo]  sys_getmlfqinfo,
 };
 
 void
@@ -137,6 +155,10 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
+    acquire(&p->lock);
+    p->syscount++;
+    p->del_s++;
+    release(&p->lock);
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
   } else {
