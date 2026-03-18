@@ -1,5 +1,6 @@
 #include "kernel/types.h"
 #include "user/user.h"
+#include "kernel/mlfqinfo.h"
 
 struct mlfqinfo info;
 
@@ -11,7 +12,7 @@ main()
     int pid = getpid();
 
     // Generate activity
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 100000; i++){
         getpid(); // syscalls
         for(int j = 0; j < 10000; j++);
     }
