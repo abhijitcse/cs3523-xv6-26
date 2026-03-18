@@ -6,10 +6,10 @@ main()
 {
     printf("=== Test 2: Priority Boost & Fairness ===\n");
 
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 4; i++){
         if(fork() == 0){
             // Make them CPU heavy so they get demoted
-            for(int j = 0; j < 150000000; j++);
+            for(int j = 0; j < 350000000; j++);
 
             int lvl_before = getlevel();
             printf("Child %d level BEFORE boost: %d\n", getpid(), lvl_before);

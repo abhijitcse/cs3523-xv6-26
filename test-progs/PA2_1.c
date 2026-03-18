@@ -3,7 +3,7 @@
 
 void cpu_bound()
 {
-    for(int i = 0; i < 100000000; i++);
+    for(int i = 0; i < 2000000000L; i++);
     printf("[CPU] PID %d Level: %d\n", getpid(), getlevel());
 }
 
